@@ -1,4 +1,4 @@
-package org.example.agent;
+package org.example;
 
 import java.lang.annotation.*;
 

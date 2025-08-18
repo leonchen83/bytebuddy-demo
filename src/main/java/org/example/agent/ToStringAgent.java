@@ -5,6 +5,8 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.example.ToString;
+
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
@@ -15,10 +17,9 @@ public class ToStringAgent {
 	public static void premain(String agentArgs, Instrumentation inst) {
 		new AgentBuilder.Default()
 				.type(ElementMatchers.isAnnotatedWith(ToString.class))
-				.transform((builder, typeDescription, classLoader, module, domain) -> builder
-						.defineMethod("toString", String.class, Modifier.PUBLIC)
-						.intercept(MethodDelegation.to(ToStringInterceptor.class))
-				)
+				.transform((builder, desc, loader, module, domain) -> 
+					builder.defineMethod("toString", String.class, Modifier.PUBLIC)
+							.intercept(MethodDelegation.to(ToStringInterceptor.class)))
 				.installOn(inst);
 	}
 	
