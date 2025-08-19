@@ -1,4 +1,9 @@
-package org.example;
+package org.example.entity;
+
+import org.example.ToString;
+import org.example.agent.ToStringAgent;
+
+import net.bytebuddy.agent.ByteBuddyAgent;
 
 /**
  * @author Baoyi Chen
@@ -9,6 +14,7 @@ public class Person {
 	protected int age = 20;
 	
 	public static void main(String[] args) {
+		ToStringAgent.premain("", ByteBuddyAgent.install());
 		System.out.println(new Person());
 	}
 }

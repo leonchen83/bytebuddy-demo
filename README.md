@@ -11,19 +11,9 @@ public class Person {
 	}
 }
 ```
-MANIFEST.MF
-```
-Manifest-Version: 1.0
-Created-By: Maven JAR Plugin 3.3.0
-Build-Jdk-Spec: 21
-Main-Class: org.example.Person
-Can-Redefine-Classes: true
-Can-Retransform-Classes: true
-Premain-Class: org.example.agent.ToStringAgent
-```
 
 ```shell
-java -javaagent:.\bytebuddy-demo-1.0-SNAPSHOT.jar -jar .\bytebuddy-demo-1.0-SNAPSHOT.jar
+java -jar .\bytebuddy-demo-1.0-SNAPSHOT.jar ...
 ```
 
 ### 字节码的方式生成toString方法

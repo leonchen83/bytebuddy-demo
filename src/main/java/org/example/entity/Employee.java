@@ -1,5 +1,6 @@
-package org.example;
+package org.example.entity;
 
+import org.example.ToString;
 import org.example.enhance.ToStringEnhancer;
 
 /**
