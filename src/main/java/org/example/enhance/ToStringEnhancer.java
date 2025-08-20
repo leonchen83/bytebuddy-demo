@@ -4,7 +4,6 @@ import static net.bytebuddy.jar.asm.ClassWriter.COMPUTE_FRAMES;
 import static net.bytebuddy.jar.asm.ClassWriter.COMPUTE_MAXS;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-import org.example.ToStringGenerator;
 import org.example.ToStringGeneratorEx;
 
 import net.bytebuddy.ByteBuddy;
