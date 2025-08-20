@@ -70,13 +70,21 @@ public class ToStringGeneratorEx implements Implementation {
 					
 					MethodDescription appendMethod;
 					TypeDescription fieldType = field.getType().asErasure();
-					if (fieldType.represents(int.class)) appendMethod = findMethod(StringBuilder.class, "append", int.class);
-					else if (fieldType.represents(long.class)) appendMethod = findMethod(StringBuilder.class, "append", long.class);
-					else if (fieldType.represents(double.class)) appendMethod = findMethod(StringBuilder.class, "append", double.class);
-					else if (fieldType.represents(float.class)) appendMethod = findMethod(StringBuilder.class, "append", float.class);
-					else if (fieldType.represents(boolean.class)) appendMethod = findMethod(StringBuilder.class, "append", boolean.class);
-					else if (fieldType.represents(char.class)) appendMethod = findMethod(StringBuilder.class, "append", char.class);
-					else appendMethod = findMethod(StringBuilder.class, "append", Object.class);
+					if (fieldType.represents(int.class) || fieldType.represents(byte.class) || fieldType.represents(short.class)) {
+						appendMethod = findMethod(StringBuilder.class, "append", int.class);
+					} else if (fieldType.represents(long.class)) {
+						appendMethod = findMethod(StringBuilder.class, "append", long.class);
+					} else if (fieldType.represents(double.class)) {
+						appendMethod = findMethod(StringBuilder.class, "append", double.class);
+					} else if (fieldType.represents(float.class)) {
+						appendMethod = findMethod(StringBuilder.class, "append", float.class);
+					} else if (fieldType.represents(boolean.class)) {
+						appendMethod = findMethod(StringBuilder.class, "append", boolean.class);
+					} else if (fieldType.represents(char.class)) {
+						appendMethod = findMethod(StringBuilder.class, "append", char.class);
+					} else {
+						appendMethod = findMethod(StringBuilder.class, "append", Object.class);
+					}
 					
 					StackManipulation appendField = new StackManipulation.Compound(
 							new TextConstant(field.getName() + "="),

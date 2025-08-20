@@ -4,7 +4,7 @@ import static net.bytebuddy.jar.asm.ClassWriter.COMPUTE_FRAMES;
 import static net.bytebuddy.jar.asm.ClassWriter.COMPUTE_MAXS;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-import org.example.ToStringGeneratorEx;
+import org.example.ToStringGenerator;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.asm.AsmVisitorWrapper;
@@ -19,7 +19,7 @@ public class ToStringEnhancer {
 	public static <T> T enhance(Class<T> clazz) {
 		Class<?> r = new ByteBuddy()
 				.subclass(clazz).name(clazz.getName() + "$ToString")
-				.method(named("toString")).intercept(new ToStringGeneratorEx(new TypeDescription.ForLoadedType(clazz)))
+				.method(named("toString")).intercept(new ToStringGenerator(new TypeDescription.ForLoadedType(clazz)))
 				.visit(new AsmVisitorWrapper.ForDeclaredMethods()
 						.writerFlags(COMPUTE_FRAMES | COMPUTE_MAXS)).make()
 				.load(clazz.getClassLoader()).getLoaded();
