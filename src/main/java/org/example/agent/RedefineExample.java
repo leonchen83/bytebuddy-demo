@@ -2,6 +2,9 @@ package org.example.agent;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 import org.example.ToStringGenerator;
 
 import net.bytebuddy.ByteBuddy;
@@ -25,5 +28,7 @@ public class RedefineExample {
 				.make().load(Thread.currentThread().getContextClassLoader(), ClassLoadingStrategy.Default.INJECTION).getLoaded();
 		
 		System.out.println(clazz.getConstructor().newInstance());
+		
+		System.out.println(Arrays.stream(clazz.getDeclaredMethods()).map(e -> e.toString()).collect(Collectors.joining("\n")));
 	}
 }
