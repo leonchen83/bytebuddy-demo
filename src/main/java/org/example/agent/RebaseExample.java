@@ -19,6 +19,7 @@ package org.example.agent;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
 import java.util.Arrays;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import org.example.ToStringGenerator;
@@ -27,6 +28,8 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.implementation.MethodDelegation;
+import net.bytebuddy.implementation.bind.annotation.SuperCall;
 import net.bytebuddy.pool.TypePool;
 
 public class RebaseExample {
@@ -39,9 +42,27 @@ public class RebaseExample {
 				.method(named("toString"))
 				.intercept(new ToStringGenerator(description))
 				.make().load(Thread.currentThread().getContextClassLoader(), ClassLoadingStrategy.Default.INJECTION).getLoaded();
+
+		System.out.println(clazz.getConstructor().newInstance());
+
+		System.out.println(Arrays.stream(clazz.getDeclaredMethods()).map(e -> e.toString()).collect(Collectors.joining("\n")));
+	}
+	
+	public static void rebase() throws Exception {
+		TypePool pool = TypePool.Default.of(Thread.currentThread().getContextClassLoader());
+		Class<?> clazz = new ByteBuddy()
+				.rebase(pool.describe("org.example.entity.Manager").resolve(), ClassFileLocator.ForClassLoader.of(Thread.currentThread().getContextClassLoader()))
+				.method(named("toString"))
+				.intercept(MethodDelegation.to(new ToStringIntercept()))
+				.make().load(Thread.currentThread().getContextClassLoader(), ClassLoadingStrategy.Default.INJECTION).getLoaded();
 		
 		System.out.println(clazz.getConstructor().newInstance());
-		
-		System.out.println(Arrays.stream(clazz.getDeclaredMethods()).map(e -> e.toString()).collect(Collectors.joining("\n")));
+	}
+	
+	public static class ToStringIntercept {
+		public String intercept(@SuperCall Callable<String> origin) throws Exception {
+			String original = origin.call();
+			return "enhance:" + original;
+		}
 	}
 }
