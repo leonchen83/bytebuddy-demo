@@ -22,4 +22,18 @@ public class ToStringAgentEx {
 								.intercept(new ToStringGenerator(desc)))
 				.installOn(inst);
 	}
+	
+	@ToString
+	public class Person {
+		protected String name = "Alice";
+		protected int age = 20;
+		
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("Person[name=").append(name);
+			builder.append(", age=").append(age).append(']');
+			return builder.toString();
+		}
+	}
 }

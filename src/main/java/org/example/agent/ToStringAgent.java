@@ -1,9 +1,10 @@
 package org.example.agent;
 
+import static java.lang.reflect.Modifier.PUBLIC;
+import static java.util.stream.Collectors.joining;
+
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import org.example.ToString;
 
@@ -18,7 +19,7 @@ public class ToStringAgent {
 		new AgentBuilder.Default()
 				.type(ElementMatchers.isAnnotatedWith(ToString.class))
 				.transform((builder, desc, loader, module, domain) -> 
-					builder.defineMethod("toString", String.class, Modifier.PUBLIC)
+					builder.defineMethod("toString", String.class, PUBLIC)
 							.intercept(MethodDelegation.to(ToStringInterceptor.class)))
 				.installOn(inst);
 	}
@@ -34,7 +35,18 @@ public class ToStringAgent {
 						} catch (IllegalAccessException e) {
 							return f.getName() + "=<inaccessible>";
 						}
-					}).collect(Collectors.joining(", ", obj.getClass().getSimpleName() + "[", "]"));
+					}).collect(joining(", ", obj.getClass().getSimpleName() + "[", "]"));
+		}
+	}
+	
+	@ToString
+	public class Person {
+		protected String name = "Alice";
+		protected int age = 20;
+		
+		@Override
+		public String toString() {
+			return ToStringInterceptor.intercept(this);
 		}
 	}
 }

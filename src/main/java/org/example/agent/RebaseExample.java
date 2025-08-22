@@ -38,7 +38,8 @@ public class RebaseExample {
 		TypePool pool = TypePool.Default.of(Thread.currentThread().getContextClassLoader());
 		TypeDescription description = pool.describe("org.example.entity.Manager").resolve();
 		Class<?> clazz = new ByteBuddy()
-				.rebase(pool.describe("org.example.entity.Manager").resolve(), ClassFileLocator.ForClassLoader.of(Thread.currentThread().getContextClassLoader()))
+				.rebase(pool.describe("org.example.entity.Manager").resolve(), 
+						ClassFileLocator.ForClassLoader.of(Thread.currentThread().getContextClassLoader()))
 				.method(named("toString"))
 				.intercept(new ToStringGenerator(description))
 				.make().load(Thread.currentThread().getContextClassLoader(), ClassLoadingStrategy.Default.INJECTION).getLoaded();
@@ -51,7 +52,8 @@ public class RebaseExample {
 	public static void rebase() throws Exception {
 		TypePool pool = TypePool.Default.of(Thread.currentThread().getContextClassLoader());
 		Class<?> clazz = new ByteBuddy()
-				.rebase(pool.describe("org.example.entity.Manager").resolve(), ClassFileLocator.ForClassLoader.of(Thread.currentThread().getContextClassLoader()))
+				.rebase(pool.describe("org.example.entity.Manager").resolve(), 
+						ClassFileLocator.ForClassLoader.of(Thread.currentThread().getContextClassLoader()))
 				.method(named("toString"))
 				.intercept(MethodDelegation.to(new ToStringIntercept()))
 				.make().load(Thread.currentThread().getContextClassLoader(), ClassLoadingStrategy.Default.INJECTION).getLoaded();

@@ -22,7 +22,8 @@ public class RedefineExample {
 		TypePool pool = TypePool.Default.of(Thread.currentThread().getContextClassLoader());
 		TypeDescription description = pool.describe("org.example.entity.Manager").resolve();
 		Class<?> clazz = new ByteBuddy()
-				.redefine(pool.describe("org.example.entity.Manager").resolve(), ClassFileLocator.ForClassLoader.of(Thread.currentThread().getContextClassLoader()))
+				.redefine(pool.describe("org.example.entity.Manager").resolve(), 
+						ClassFileLocator.ForClassLoader.of(Thread.currentThread().getContextClassLoader()))
 				.method(named("toString"))
 				.intercept(new ToStringGenerator(description))
 				.make().load(Thread.currentThread().getContextClassLoader(), ClassLoadingStrategy.Default.INJECTION).getLoaded();

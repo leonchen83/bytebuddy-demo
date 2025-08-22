@@ -17,7 +17,6 @@
 package org.example.dynamicproxy;
 
 import static net.bytebuddy.dynamic.loading.ClassLoadingStrategy.Default.WRAPPER;
-import static net.bytebuddy.implementation.InvocationHandlerAdapter.of;
 import static net.bytebuddy.matcher.ElementMatchers.isDeclaredBy;
 import static net.bytebuddy.matcher.ElementMatchers.isDefaultMethod;
 import static net.bytebuddy.matcher.ElementMatchers.isFinalizer;
@@ -27,6 +26,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.matcher.ElementMatchers;
 
 /**
@@ -50,13 +50,13 @@ public class ProxyFactory {
 	<T> Class<? extends T> proxyInterface(Class<T> c, InvocationHandler h) {
 		return (Class<? extends T>) new ByteBuddy().subclass((Object.class)).implement(c)
 				.method(isDeclaredBy(c).and(ElementMatchers.not(isDefaultMethod())))
-				.intercept(of(h)).make().load(c.getClassLoader(), WRAPPER).getLoaded();
+				.intercept(InvocationHandlerAdapter.of(h)).make().load(c.getClassLoader(), WRAPPER).getLoaded();
 	}
 	
 	<T> Class<? extends T> proxyConcreate(Class<T> c, InvocationHandler h) {
 		return new ByteBuddy().subclass(c).method(not(isFinalizer())
 						.and(not(isDeclaredBy((Object.class)))).and(not(isDefaultMethod())))
-				.intercept(of(h)).make().load(c.getClassLoader(), WRAPPER).getLoaded();
+				.intercept(InvocationHandlerAdapter.of(h)).make().load(c.getClassLoader(), WRAPPER).getLoaded();
 	}
 	
 	public static interface ITest {
