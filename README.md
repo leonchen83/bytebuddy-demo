@@ -95,3 +95,13 @@ Agent 模式推荐使用 `-javaagent` JVM 参数来启动。首先需要修改 `
 # 确保 pom.xml 中已配置好 Premain-Class
 java -javaagent:target/bytebuddy-demo-1.0-SNAPSHOT.jar -cp target/bytebuddy-demo-1.0-SNAPSHOT.jar org.example.entity.Person
 ```
+
+## 附录：关于动态加载 Agent (Dynamic Attach)
+
+除了使用 `-javaagent` 参数在 JVM 启动时加载 Agent，ByteBuddy 还提供了强大的动态加载（或称“动态挂载”）功能。
+
+- **工作原理**: 该功能通过 `net.bytebuddy.agent.ByteBuddyAgent.install()` 方法实现。它会利用 Java 的 Attach API，将 Agent 挂载到当前正在运行的 JVM 进程上，从而获取一个 `Instrumentation` 实例，进而允许我们修改已加载的类。
+
+- **项目示例**: 本项目的 `org.example.Main` 类就展示了这种用法。它在 `main` 方法中调用 `ToStringAgent.premain("", ByteBuddyAgent.install())`，使得 Agent 的转换逻辑可以立即应用到当前应用中。
+
+- **适用场景**: 这种方式非常适合在开发、测试环节快速验证 Agent 的功能，或者用于那些无法方便地修改启动参数的已运行环境中。
