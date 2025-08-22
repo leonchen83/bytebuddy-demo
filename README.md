@@ -1,62 +1,97 @@
-# Byte Buddy Demo
+# ByteBuddy 深度解析与实战
 
-本工程是一个 [Byte Buddy](https://bytebuddy.net) 的功能示例库，旨在通过具体的代码实例，深入浅出地展示其在不同场景下的核心用法。
+ByteBuddy 是一个强大、灵活的 Java 字节码操作库，它允许在运行时创建和修改 Java 类，而无需编译器的帮助。
 
-## 功能模块
+通过分析本项目中的具体示例，你可以深入理解 ByteBuddy 在不同场景下的核心用法，例如动态代理、代码增强和 Java Agent 等。
 
-工程主要包含以下几个模块，每个模块都演示了 Byte Buddy 的一种核心能力：
+## 核心概念展示
 
-1.  **动态代理 (`dynamicproxy`)**:
-    *   展示了如何为接口或类创建动态代理，实现方法调用的拦截，类似于 Spring AOP。
+本项目主要演示了 ByteBuddy 的以下几种核心能力：
 
-2.  **类增强 (`enhance`)**:
-    *   演示了如何在不修改源码的情况下，通过创建子类的方式为现有类添加或重写方法。
+1.  **动态子类生成 (Enhancement)**: 在不修改原始类代码的情况下，创建一个增强版的子类，并重写或添加新的方法。
+2.  **动态代理 (Dynamic Proxy)**: 类似于 JDK Proxy 和 CGLIB，为接口或类创建代理，实现方法调用的拦截（AOP）。
+3.  **类重定义与变基 (Redefine & Rebase)**: 在运行时修改已加载的类，可以完全替换方法实现（Redefine），或者在保留原方法的基础上进行增强（Rebase）。
+4.  **Java Agent**: 通过 Java Agent 技术在 JVM 加载类时动态地修改类的字节码，实现全局、无侵入的功能注入。
 
-3.  **Java Agent (`agent`)**:
-    *   这是 Byte Buddy 最强大的功能之一。通过 Java Agent 技术，在 JVM 加载类时动态地修改字节码，实现全局、无侵入的功能注入。
-    *   示例中包含了两种 Agent 实现方式：
-        *   `ToStringAgent`: 使用**反射**在运行时动态生成 `toString` 方法，简单易懂。
-        *   `ToStringAgentEx`: 直接**生成字节码**来实现 `toString` 方法，性能更高。
-    *   同时，也展示了 `redefine` (重定义) 和 `rebase` (变基) 两种在运行时修改已加载类的不同策略。
+---
 
-4.  **实体类 (`entity`)**:
-    *   包含 `Person`, `Employee`, `Manager` 等 POJO 类，作为字节码操作的目标对象。
+## 代码结构与示例分析
+
+### 1. 基础实体与注解 (`/entity`, `ToString.java`)
+
+-   **`org.example.entity.*`**: 包含 `Person`, `Employee`, `Manager` 等简单的 POJO 类。它们是后续所有字节码操作的目标。
+-   **`@ToString`**: 一个自定义的运行时注解，用于标记哪些类需要被动态添加 `toString()` 方法。这是 Java Agent 模式下识别目标类的依据。
+
+### 2. Java Agent (`/agent`)
+
+这是 ByteBuddy 最强大的功能之一。Agent 可以在 JVM 加载类时进行拦截和修改，实现无侵入的全局增强。本项目的 Agent 示例旨在为被 `@ToString` 注解的类动态添加 `toString()` 方法。
+
+#### Agent 实现对比：`ToStringAgent` vs `ToStringAgentEx`
+
+-   **`ToStringAgent` (基于反射)**
+    -   **原理**: 将 `toString()` 方法的实现委托给一个静态的 `intercept` 方法。这个 `intercept` 方法在运行时通过 **Java 反射**来获取对象的字段和值，并拼接成字符串。
+    -   **生成的代码（概念上）**: 
+        ```java
+        public String toString() {
+            // 调用包含反射逻辑的静态方法
+            return ToStringAgent.ToStringInterceptor.intercept(this);
+        }
+        ```
+    -   **优点**: 实现相对简单直观。
+    -   **缺点**: 反射会带来一定的性能开销。
+
+-   **`ToStringAgentEx` (基于字节码生成)**
+    -   **原理**: 使用 `ToStringGenerator` 直接为 `toString()` 方法**生成完整的字节码**。它在编译期就确定了要操作的字段，并在生成的字节码中通过 `StringBuilder` 高效地拼接字符串。
+    -   **生成的代码（概念上）**: 
+        ```java
+        public String toString() {
+            // 高效的 StringBuilder 拼接逻辑
+            StringBuilder builder = new StringBuilder();
+            builder.append("Person[name=").append(name);
+            builder.append(", age=").append(age).append(']');
+            return builder.toString();
+        }
+        ```
+    -   **优点**: 性能更高，无反射开销。
+    -   **缺点**: 实现 `ToStringGenerator` 需要手动操作字节码指令，相对复杂。
+
+#### 类修改策略对比：`Redefine` vs `Rebase`
+
+这两个示例展示了在运行时修改**已加载类**的两种不同策略。
+
+-   **`RedefineExample` (重定义)**
+    -   **策略**: 使用 `byteBuddy.redefine()` 会**完全丢弃**目标方法（如 `toString`）的原始实现，并用新的实现取而代之。
+    -   **结果**: 修改后，类中只存在新的 `toString` 方法，原方法已不存在。
+
+-   **`RebaseExample` (变基)**
+    -   **策略**: 使用 `byteBuddy.rebase()` 会**保留**目标方法的原始实现。它将原方法重命名为一个私有的、带随机后缀的方法，然后创建新的 `toString` 方法作为“入口”。
+    -   **结果**: 修改后，类中同时存在新的 `toString` 方法和被重命名的原方法。例如：
+        ```
+        public java.lang.String org.example.entity.Manager.toString()
+        private java.lang.String org.example.entity.Manager.toString$original$bmVVQFi6()
+        ```
+    -   **应用**: 这种机制使得我们可以在新方法中通过 `@SuperCall` 注解来调用到原始方法，非常适合实现“方法包装”或“AOP”等功能。
+
+### 3. 其他示例
+
+-   **`/enhance/ToStringEnhancer.java`**: 展示了通过**创建子类**的方式来“增强”一个现有类，是非侵入式修改的另一种思路。
+-   **`/dynamicproxy/ProxyFactory.java`**: 演示了如何使用 ByteBuddy 创建动态代理，实现类似 Spring AOP 的方法拦截效果。
+
+---
 
 ## 如何运行
 
 ### 1. 构建项目
 
-本项目使用 Maven 构建。首先，在项目根目录下执行以下命令，打包生成 JAR 文件：
-
 ```bash
 mvn clean package
 ```
 
-### 2. 运行示例
+### 2. 运行 Agent
 
-#### 运行 Main 方法 (动态 Attach Agent)
-
-可以直接运行 `org.example.Main` 类的 `main` 方法。该方法通过 `ByteBuddyAgent.install()` 在运行时动态地加载并应用 Agent。
-
-```java
-public class Main {
-	public static void main(String[] args) {
-		// 动态 attach agent
-		ToStringAgent.premain("", ByteBuddyAgent.install());
-		System.out.println(new Person());
-	}
-}
-```
-
-#### 通过 -javaagent 参数启动
-
-你也可以使用标准的 `-javaagent` JVM 参数来加载代理。首先需要修改 `pom.xml` 中的 `maven-jar-plugin` 配置，将 `Premain-Class` 指向你希望启动的 Agent (例如 `org.example.agent.ToStringAgent`)，然后执行：
+Agent 模式推荐使用 `-javaagent` JVM 参数来启动。首先需要修改 `pom.xml` 中的 `maven-jar-plugin` 配置，将 `Premain-Class` 指向你希望启动的 Agent (例如 `org.example.agent.ToStringAgent`)，然后执行：
 
 ```bash
 # 确保 pom.xml 中已配置好 Premain-Class
 java -javaagent:target/bytebuddy-demo-1.0-SNAPSHOT.jar -cp target/bytebuddy-demo-1.0-SNAPSHOT.jar org.example.entity.Person
 ```
-
-#### 运行其他模块
-
-对于非 Agent 的示例 (如 `dynamicproxy`, `enhance`)，可以直接在 IDE 中运行其对应的 `main` 方法来查看效果。
