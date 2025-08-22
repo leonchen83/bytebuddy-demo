@@ -46,7 +46,10 @@ public class RebaseExample {
 
 		System.out.println(clazz.getConstructor().newInstance());
 
+		// 保留原方法并改名
 		System.out.println(Arrays.stream(clazz.getDeclaredMethods()).map(e -> e.toString()).collect(Collectors.joining("\n")));
+		// public java.lang.String org.example.entity.Manager.toString()
+		// private java.lang.String org.example.entity.Manager.toString$original$bmVVQFi6()
 	}
 	
 	public static void rebase() throws Exception {

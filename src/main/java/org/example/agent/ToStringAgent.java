@@ -38,4 +38,18 @@ public class ToStringAgent {
 					}).collect(Collectors.joining(", ", obj.getClass().getSimpleName() + "[", "]"));
 		}
 	}
+	
+	/**
+	 * 使用ToStringInterceptor编译后toString的字节码 
+	 */
+	@ToString
+	public class Person {
+		protected String name = "Alice";
+		protected int age = 20;
+		
+		@Override
+		public String toString() {
+			return ToStringAgent.ToStringInterceptor.intercept(this);
+		}
+	}
 }

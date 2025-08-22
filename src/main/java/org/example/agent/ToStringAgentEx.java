@@ -23,6 +23,9 @@ public class ToStringAgentEx {
 				.installOn(inst);
 	}
 	
+	/**
+	 * 使用ToStringGenerator编译后toString的字节码 
+	 */
 	@ToString
 	public class Person {
 		protected String name = "Alice";

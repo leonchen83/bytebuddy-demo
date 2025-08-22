@@ -30,6 +30,8 @@ public class RedefineExample {
 		
 		System.out.println(clazz.getConstructor().newInstance());
 		
+		// 不保留原方法
 		System.out.println(Arrays.stream(clazz.getDeclaredMethods()).map(e -> e.toString()).collect(Collectors.joining("\n")));
+		// public java.lang.String org.example.entity.Manager.toString()
 	}
 }
