@@ -87,7 +87,18 @@ ByteBuddy 是一个强大、灵活的 Java 字节码操作库，它允许在运�
 mvn clean package
 ```
 
-### 2. 运行 Agent
+### 2. Agent JAR 的 MANIFEST.MF 配置
+
+为了让一个 JAR 文件能作为 Java Agent 使用，需要在其 `META-INF/MANIFEST.MF` 文件中配置特定的属性。在使用 Maven 时，这通常通过 `maven-jar-plugin` 或 `maven-shade-plugin` 来完成。关键属性包括：
+
+-   **`Premain-Class`**: 指定包含 `premain` 方法的 Agent 入口类。当使用 `-javaagent` 参数在 JVM 启动时加载 Agent 时，该类的方法会被调用。
+-   **`Agent-Class`**: 指定包含 `agentmain` 方法的 Agent 入口类。当 Agent 在 JVM 启动后被动态挂载（Dynamic Attach）时，该类的方法会被调用。
+-   **`Can-Redefine-Classes`**: 布尔值 (`true` 或 `false`)。设为 `true` 才允许 Agent 重定义（redefine）已加载的类。
+-   **`Can-Retransform-Classes`**: 布尔值 (`true` 或 `false`)。设为 `true` 才允许 Agent 重转换（retransform）已加载的类。这对于 `AgentBuilder.RedefinitionStrategy.RETRANSFORMATION` 策略是必需的。
+
+在本项目中，这些配置可以通过修改 `pom.xml` 中的 `maven-shade-plugin` 插件部分来实现。
+
+### 3. 运行 Agent
 
 Agent 模式推荐使用 `-javaagent` JVM 参数来启动。首先需要修改 `pom.xml` 中的 `maven-jar-plugin` 配置，将 `Premain-Class` 指向你希望启动的 Agent (例如 `org.example.agent.ToStringAgent`)，然后执行：
 
