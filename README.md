@@ -104,7 +104,7 @@ Agent 模式推荐使用 `-javaagent` JVM 参数来启动。首先需要修改 `
 
 ```bash
 # 确保 pom.xml 中已配置好 Premain-Class
-java -javaagent:target/bytebuddy-demo-1.0-SNAPSHOT.jar -cp target/bytebuddy-demo-1.0-SNAPSHOT.jar org.example.entity.Person
+java -javaagent:target/bytebuddy-demo-1.0-SNAPSHOT.jar -cp target/bytebuddy-demo-1.0-SNAPSHOT.jar org.example.Main
 ```
 
 ## 附录：关于动态加载 Agent (Dynamic Attach)
