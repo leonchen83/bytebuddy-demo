@@ -55,15 +55,17 @@ public class ProxyFactory {
 	}
 	
 	public static class TestProxy extends Test {
-		private InvocationHandler handler;
+		private Test target;
+		
+		public TestProxy(Test target) {
+			this.target = target;
+		}
 		
 		@Override
 		public void run() {
-			try {
-				handler.invoke(this, Test.class.getMethod("run"), null);
-			} catch (Throwable e) {
-				throw new RuntimeException(e);
-			}
+			System.out.println("Before Running");
+			target.run();
+			System.out.println("After Running");
 		}
 	}
 	
@@ -76,8 +78,10 @@ public class ProxyFactory {
 		
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			System.out.println("Running: " + method.getName());
-			return method.invoke(target, args);
+			System.out.println("Before Running");
+			Object r = method.invoke(target, args);
+			System.out.println("After Running");
+			return r;
 		}
 	}
 	
@@ -90,8 +94,7 @@ public class ProxyFactory {
 		
 		System.out.println("#".repeat(32));
 		
-		TestProxy proxy = new TestProxy();
-		proxy.handler = new XInvocationHandler(target);
+		TestProxy proxy = new TestProxy(target);
 		proxy.run();
 	}
 }
