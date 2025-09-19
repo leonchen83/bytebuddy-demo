@@ -54,21 +54,6 @@ public class ProxyFactory {
 		}
 	}
 	
-	public static class TestProxy extends Test {
-		private Test target;
-		
-		public TestProxy(Test target) {
-			this.target = target;
-		}
-		
-		@Override
-		public void run() {
-			System.out.println("Before Running");
-			target.run();
-			System.out.println("After Running");
-		}
-	}
-	
 	static class XInvocationHandler implements InvocationHandler {
 		Object target;
 		
@@ -96,5 +81,20 @@ public class ProxyFactory {
 		
 		TestProxy proxy = new TestProxy(target);
 		proxy.run();
+	}
+	
+	public static class TestProxy extends Test {
+		private Test target;
+		
+		public TestProxy(Test target) {
+			this.target = target;
+		}
+		
+		@Override
+		public void run() {
+			System.out.println("Before Running");
+			target.run();
+			System.out.println("After Running");
+		}
 	}
 }
